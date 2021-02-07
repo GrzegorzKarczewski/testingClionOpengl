@@ -19,6 +19,7 @@
 #include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
 #include <glm/ext/matrix_clip_space.hpp> // glm::perspective
 #include <glm/ext/scalar_constants.hpp> // glm::pi
+#include <glm/gtc/type_ptr.hpp>
 
 
 
@@ -298,6 +299,43 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, 0);
     SOIL_free_image_data(image);
 
+    // ugly implementation for second texture
+    int image_width2 = 0;
+    int image_height2 = 0;
+
+    unsigned char *image_back = SOIL_load_image("../Images/pngegg.png", &image_width2, &image_height2, NULL, SOIL_LOAD_RGBA);
+
+    GLuint  texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D,texture1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_FLAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_FLAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    if (image_back) {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_back);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else
+    {
+        std::cout << "Error: Loading  texture failed" << "\n";
+    }
+    glActiveTexture(1);
+    glBindTexture(GL_TEXTURE_2D, 1);
+    SOIL_free_image_data(image_back);
+
+    glm::mat4 ModelMatrix(1.f);
+    ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f));
+    ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3 (1.f, 0.f, 0.f));
+    ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3 (0.f, 1.f, 0.f));
+    ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3 (0.f, 0.f, 1.f));
+    ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.1f));
+
+    glUseProgram(core_program);
+    glUniformMatrix4fv(glGetUniformLocation(core_program, "ModelMatrix"), 1,GL_FALSE , glm::value_ptr(ModelMatrix));
+    glUseProgram(0);
 
     // main loop
     while(!glfwWindowShouldClose(window)) {
@@ -313,9 +351,32 @@ int main() {
         // Use a shader program
         glUseProgram(core_program);
 
+        //
+        glUniform1i(glGetUniformLocation(core_program,"texture0" ), 0);
+        // For second texture
+        glUniform1i(glGetUniformLocation(core_program,"texture1" ), 1);
+
+
+
+        // Rotate move scale
+
+        ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.f));
+        ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3 (1.f, 0.f, 0.f));
+        ModelMatrix = glm::rotate(ModelMatrix, glm::radians(0.f), glm::vec3 (0.f, 1.f, 0.f));
+        ModelMatrix = glm::rotate(ModelMatrix, glm::radians(1.f), glm::vec3 (0.f, 0.f, 1.f));
+        ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0011f));
+
+        glUniformMatrix4fv(glGetUniformLocation(core_program, "ModelMatrix"), 1,GL_FALSE , glm::value_ptr(ModelMatrix));
+
+
+
         // Texture Activate
         glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE1);
+
         glBindTexture(GL_TEXTURE_2D, texture0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+
         // bind vertex array object
         glBindVertexArray(VAO);
 
@@ -329,6 +390,10 @@ int main() {
         glfwSwapBuffers(window);
         glFlush();
 
+        glBindVertexArray(0);
+        glUseProgram(0);
+        glActiveTexture(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     // terminating
