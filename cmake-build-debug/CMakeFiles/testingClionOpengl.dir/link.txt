@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/testingClionOpengl.dir/main.cpp.o  -o testingClionOpengl  -lGL -lGLU -lGLEW -lglfw -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl 
+/usr/bin/c++  -g   CMakeFiles/testingClionOpengl.dir/main.cpp.o  -o testingClionOpengl  -lGL -lGLU -lGLEW -lglfw -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lSOIL 

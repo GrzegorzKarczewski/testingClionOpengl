@@ -11,6 +11,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <SOIL/SOIL.h>
 
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4
@@ -43,10 +44,7 @@ Vertex vertices[] =
         glm::vec3(-0.5f, 0.5f, 0.f),             glm::vec3(1.f, 0.f, 0.f),   glm::vec2(0.f, 1.f),
         glm::vec3(-0.5f, -0.5f, 0.f),             glm::vec3(0.f, 1.f, 0.f), glm::vec2 (0.f, 0.f),
         glm::vec3(0.5f, - 0.5f, 0.f),             glm::vec3(0.f, 0.f, 1.f), glm::vec2 (1.f, 0.f),
-        // Second triangle
-        //glm::vec3(-0.5f, 0.5f, 0.f),             glm::vec3(1.f, 0.f, 0.f),   glm::vec2(0.f, 1.f),
-       // glm::vec3(0.5f, - 0.5f, 0.f),             glm::vec3(0.f, 0.f, 1.f), glm::vec2 (1.f, 0.f),
-        glm::vec3(0.5f, 0.5f, 0.f),             glm::vec3(1.f, 1.f, 0.f), glm::vec2 (0.f, 0.f)
+        glm::vec3(0.5f, 0.5f, 0.f),             glm::vec3(1.f, 1.f, 0.f), glm::vec2 (1.f, 1.f)
 
         };
 unsigned  nrOfVertices = sizeof(vertices) / sizeof(Vertex);
@@ -68,6 +66,7 @@ void updateInput(GLFWwindow *window) {
     if (glfwGetKey(window,GLFW_KEY_ESCAPE ) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+    // Testing if
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && wasBpressed == false) {
         glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         wasBpressed = true;
@@ -231,7 +230,7 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
     // shader
@@ -271,7 +270,33 @@ int main() {
 
     glBindVertexArray(0);
 
+    // Init textures
 
+    int image_width = 0;
+    int image_height = 0;
+
+    unsigned char *image = SOIL_load_image("../Images/Nyan-Cat-PNG-Image.png", &image_width, &image_height, NULL, SOIL_LOAD_RGBA);
+
+    GLuint  texture0;
+    glGenTextures(1, &texture0);
+    glBindTexture(GL_TEXTURE_2D,texture0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    if (image) {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else
+    {
+        std::cout << "Error: Loadint texture failed" << "\n";
+    }
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    SOIL_free_image_data(image);
 
 
     // main loop
@@ -282,11 +307,15 @@ int main() {
         updateInput(window);
 
         //clear viewport with color
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // Use a shader program
         glUseProgram(core_program);
+
+        // Texture Activate
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture0);
         // bind vertex array object
         glBindVertexArray(VAO);
 

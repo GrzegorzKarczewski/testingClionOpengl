@@ -23,6 +23,8 @@ vector
 -
 string
 -
+SOIL/SOIL.h
+-
 glm/vec3.hpp
 -
 glm/vec4.hpp
