@@ -39,16 +39,25 @@ struct Vertex {
 Vertex vertices[] =
         {
         //Position                               // Color                                           // Texcoords
-        glm::vec3(0.0f, 0.5f, 0.f),             glm::vec3(1.f, 0.f, 0.f),   glm::vec2(0.f, 1.f),
+        // First triangle
+        glm::vec3(-0.5f, 0.5f, 0.f),             glm::vec3(1.f, 0.f, 0.f),   glm::vec2(0.f, 1.f),
         glm::vec3(-0.5f, -0.5f, 0.f),             glm::vec3(0.f, 1.f, 0.f), glm::vec2 (0.f, 0.f),
-        glm::vec3(0.5f, - 0.5f, 0.f),             glm::vec3(0.f, 0.f, 1.f), glm::vec2 (1.f, 0.f)
+        glm::vec3(0.5f, - 0.5f, 0.f),             glm::vec3(0.f, 0.f, 1.f), glm::vec2 (1.f, 0.f),
+        // Second triangle
+        //glm::vec3(-0.5f, 0.5f, 0.f),             glm::vec3(1.f, 0.f, 0.f),   glm::vec2(0.f, 1.f),
+       // glm::vec3(0.5f, - 0.5f, 0.f),             glm::vec3(0.f, 0.f, 1.f), glm::vec2 (1.f, 0.f),
+        glm::vec3(0.5f, 0.5f, 0.f),             glm::vec3(1.f, 1.f, 0.f), glm::vec2 (0.f, 0.f)
 
         };
 unsigned  nrOfVertices = sizeof(vertices) / sizeof(Vertex);
 
-GLuint  indices[] = {0, 1 , 2};
+GLuint  indices[] = {
+        0, 1 , 2, // First triangle
+       // 3, 4, 5     // Second triangle
+       0, 2 ,3 // square after optimizing for double vertex
+};
 
-unsigned nrOfIndices = sizeof(indices) / sizeof(indices);
+unsigned nrOfIndices = sizeof(indices) / sizeof(GLuint);
 
 
 /**********************************************************************************************************************/
@@ -222,7 +231,7 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
     // shader
@@ -255,7 +264,7 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid *) offsetof(Vertex, color));
     glEnableVertexAttribArray(1);
     // Texture Coordinates
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid *) offsetof(Vertex, texcoord));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),(GLvoid *) offsetof(Vertex, texcoord));
     glEnableVertexAttribArray(2);
 
     // Bind VAO
@@ -282,7 +291,7 @@ int main() {
         glBindVertexArray(VAO);
 
         // Draw
-        glDrawElements(GL_TRIANGLES, nrOfVertices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, nrOfIndices, GL_UNSIGNED_INT, 0);
         //glDrawArrays(GL_TRIANGLES, 0, nrOfVertices);
 
 
